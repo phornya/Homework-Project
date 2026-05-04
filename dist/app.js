@@ -5,17 +5,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
-const db_js_1 = __importDefault(require("./config/db.js"));
+const db_1 = __importDefault(require("./config/db"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const port = process.env.PORT || 3000;
-app.use(express_1.default.json()); // Middleware to parse JSON
+app.use(express_1.default.json());
 // Routes
 app.use('/api/users', userRoutes_1.default);
 const initDb = async () => {
     try {
-        const connection = await db_js_1.default.getConnection();
+        const connection = await db_1.default.getConnection();
         await connection.query(`
       CREATE TABLE IF NOT EXISTS users (
         id INT AUTO_INCREMENT PRIMARY KEY,

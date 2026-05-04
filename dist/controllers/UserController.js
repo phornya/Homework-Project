@@ -1,102 +1,63 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserController = void 0;
-const User_1 = require("../models/User");
-class UserController {
+const BaseController_1 = require("./BaseController");
+const UserService_1 = require("../services/UserService");
+class UserController extends BaseController_1.BaseController {
+    userService;
+    constructor() {
+        super();
+        this.userService = new UserService_1.UserService();
+    }
     getAllUsers = async (req, res) => {
-        try {
-            const users = await User_1.User.getAll();
-            res.status(200).json(users);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            }
-            else {
-                res.status(500).json({ message: 'Internal server error' });
-            }
-        }
+        await this.handleAsyncError(res, async () => {
+            const users = await this.userService.getAllUsers();
+            this.sendSuccess(res, users, 200);
+        });
     };
     getUserById = async (req, res) => {
-        try {
+        await this.handleAsyncError(res, async () => {
             const id = parseInt(req.params.id, 10);
-            const user = await User_1.User.getById(id);
+            const user = await this.userService.getUserById(id);
             if (user) {
-                res.status(200).json(user);
+                this.sendSuccess(res, user, 200);
             }
             else {
-                res.status(404).json({ message: 'User not found' });
+                this.sendError(res, 'User not found', 404);
             }
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            }
-            else {
-                res.status(500).json({ message: 'Internal server error' });
-            }
-        }
+        });
     };
     createUser = async (req, res) => {
-        try {
-            const { name, email } = req.body; // Using object destructuring
-            if (!name || !email) {
-                res.status(400).json({ message: 'Name and email are required' });
-                return;
-            }
-            const newUser = { name, email };
-            const createdUser = await User_1.User.create(newUser);
-            res.status(201).json(createdUser);
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            }
-            else {
-                res.status(500).json({ message: 'Internal server error' });
-            }
-        }
+        await this.handleAsyncError(res, async () => {
+            const { name, email } = req.body;
+            const createdUser = await this.userService.createUser({ name, email });
+            this.sendSuccess(res, createdUser, 201);
+        });
     };
     updateUser = async (req, res) => {
-        try {
+        await this.handleAsyncError(res, async () => {
             const id = parseInt(req.params.id, 10);
-            const { name, email } = req.body; // Using object destructuring
-            const success = await User_1.User.update(id, { name, email });
-            if (success) {
-                res.status(200).json({ message: 'User updated successfully' });
+            const { name, email } = req.body;
+            const updatedUser = await this.userService.updateUser(id, { name, email });
+            if (updatedUser) {
+                this.sendSuccess(res, updatedUser, 200);
             }
             else {
-                res.status(404).json({ message: 'User not found' });
+                this.sendError(res, 'Failed to update user', 500);
             }
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            }
-            else {
-                res.status(500).json({ message: 'Internal server error' });
-            }
-        }
+        });
     };
     deleteUser = async (req, res) => {
-        try {
+        await this.handleAsyncError(res, async () => {
             const id = parseInt(req.params.id, 10);
-            const success = await User_1.User.delete(id);
+            const success = await this.userService.deleteUser(id);
             if (success) {
-                res.status(200).json({ message: 'User deleted successfully' });
+                this.sendSuccess(res, { message: 'User deleted successfully' }, 200);
             }
             else {
-                res.status(404).json({ message: 'User not found' });
+                this.sendError(res, 'Failed to delete user', 500);
             }
-        }
-        catch (error) {
-            if (error instanceof Error) {
-                res.status(500).json({ message: error.message });
-            }
-            else {
-                res.status(500).json({ message: 'Internal server error' });
-            }
-        }
+        });
     };
 }
 exports.UserController = UserController;
